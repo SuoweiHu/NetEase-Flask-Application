@@ -26,7 +26,7 @@ class Adapter_dictToDB:
             result_list.append(playlist)
         return result_list
 
-class Database:
+class Database_Utils:
     host = 'localhost'
     port = 27017
     client = None
@@ -73,4 +73,27 @@ class Database:
             else: playlist_db.update_one({"_id":playlist['_id']}, {"$set":playlist})
         
         return
+
+def database_factory(clear=True):
+    database = Database_Utils()
+    database.start()
+    if(clear):
+        (database.collection("user")).drop()
+        (database.collection("playlist")).drop()
+        (database.collection("song")).drop()
+    return database
+
+__database_util__ = database_factory(clear=False) # 初始化数据库
+
+def insert(result, id):
+    __database_util__.dump_user(result, id)
+    return 
+
+def start(clear=False):
+    __database_util__ = database_factory(clear=clear) # 初始化数据库
+    return __database_util__
+
+def close():
+    __database_util__.close()
+
 

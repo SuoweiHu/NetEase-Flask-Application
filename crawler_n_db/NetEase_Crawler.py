@@ -125,7 +125,7 @@ def driver_factory(headless = False):
         driver = webdriver.Chrome(options = chrome_options)
         return driver
 
-__driver__ = driver_factory(headless = True)       # 无界面？(Headless) 
+__driver__ = driver_factory(headless = True) 
 
 def scroll(driver, repeat = 5):
     for i in range(1, repeat):
@@ -461,3 +461,11 @@ def craw(id):
     parsed_user     = parse_userPage(html_user, recursive=True,recur_limit=sys.maxsize)             # 解析用户页
     # save_toJson(text = parsed_user,     path = FILE_PATH['user'] + 'export.json')
     return parsed_user
+
+def start():
+    __driver__ = driver_factory(headless = True)       # 无界面？(Headless) 
+    return 
+
+def close():
+    __driver__.quit()
+    return 
