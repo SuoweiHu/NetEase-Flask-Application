@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <!-- Username+Password/Cookie Upload -->
+    <!-- <div>
+        Select one of the options: <br><br>
+        <input type="radio" name="option" value="account" checked="checked" id=""> Username + Password <br>
+        <input type="radio" name="option" value="cookie" id=""> User Cookie <br>
+    </div>
+    <hr> -->
+    <h1>登陆页面</h1><hr>
+    <div>
+        <h2>Credential</h2>
+        <form action="/login" method="post">
+            <div>
+                <input type="hidden" name="option" value="username+password">
+                Username: <input type="text" name="username" id=""><br><br>
+                Password: <input type="password" name="password" id=""><br><br>
+                <input type="submit" value="login">
+            </div>
+        </form>
+    </div>
+   <hr>
+   <div>
+       <h2>Cookie</h2>
+       <form action="/login" method="post">
+        <div>
+            <input type="hidden" name="option" value="cookie">
+            Cookie: &nbsp;&nbsp;&nbsp;<input type="text" name="cookie" id=""><br><br>
+            <input type="submit" value="login">
+        </div>     
+    </form>
+   </div>
+    <hr>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetEase-Crawler</title>
+</head>
+<body>
+    <!-- Heading  -->
+    <h1>初始化页面</h1><hr>
+
+    <!-- Initialize Database/Webdriver -->
+    <div>
+        <h2>数据库</h2>
+        <form action="/init" method="get">
+            <input type="hidden" name="init_option" value="database-init">
+            <input type="submit" onclick="alert('正在登陆数据库 - 请等待加载完成')" value="连接数据库(但不清除原始记录)"> 
+        </form><br>
+        <form action="/init" method="get">
+            <input type="hidden" name="init_option" value="database-init-clear">
+            <input type="submit" onclick="alert('正在登陆数据库 - 请等待加载完成')" value="连接数据库(并且清除原始记录)">
+        </form><br>
+        状态: {{database_state}} <br>
+    </div>
+    <hr>
+    <div>
+        <h2>驱动</h2>
+        <form action="/init" method="get">
+            <input type="hidden" name="init_option" value="webdriver-init-headless">
+            <input type="submit" onclick="alert('正在初始化驱动 - 请等待加载完成')" value="初始化浏览器驱动(无界面)">
+        </form><br>
+        <form action="/init" method="get">
+            <input type="hidden" name="init_option" value="webdriver-init">
+            <input type="submit" onclick="alert('正在初始化驱动 - 请等待加载完成')" value="初始化浏览器驱动(有界面)">
+        </form><br>
+        状态: {{driver_state}} <br>
+    </div>
+    <hr>
+    <div>
+        <h2>开始录入</h2>
+        <form action="/init" method="get">
+            <input type="hidden" name="login" value="login">
+            <input type="submit" value="Go">
+        </form><br>
+    </div>
+    <hr>
+    
+
+
+</body>
+</html>
