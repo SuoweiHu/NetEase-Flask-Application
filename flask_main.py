@@ -24,13 +24,15 @@ app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # 主页面(初始化界面)
-@app.route('/') 
+@app.route('/', methods=['GET','POST']) 
+@app.route('/index', methods=['GET','POST']) 
 def flask_startSession():
-    session["dr_state"] = False
-    session["db_state"] = False
-    return redirect(url_for("index"))
+    return render_template("login.html")
+    # session["dr_state"] = False
+    # session["db_state"] = False
+    # return redirect(url_for("index"))
 
-@app.route('/index') 
+# @app.route('/index') 
 def index():
     db_state_string = "已连接" if session["db_state"] else "未连接"
     dr_state_string = "已初始化实例" if session["dr_state"] else "未初始化"
@@ -47,8 +49,6 @@ def initialize_pkg(request_dict):
         True: if operation is a success 
         False: otherwise
     """
-    # global __database__
-    # global __crawler__
 
     if(request_dict["init_option"] == "database-init"):
         __database__ = NetEase_Mongodb.Database_Facade()
@@ -106,53 +106,48 @@ def initialize():
     #     return render_template("index.html", database_state=db_state_string, driver_state=dr_state_string)
 
 # 登录请求处理
+@app.route('/login')
 @app.route('/login', methods=["POST"])
 def login():
-    
-    # ==================================================================
-    print("=" * 30)
-    print(str(g["__temp_bool__"]))
-    # ==================================================================
-
-    # global __crwaler__
-
     # 如果HTTP方法为GET,那么就是用form方法获得请求参数
     if(request.method == "POST"):
-        query_dict = dict(request.form)
         if(request.form.get("option") == "username+password"):
             username = request.form.get("username")
             password = request.form.get("password")
-            
-            __crwaler__.login(account=username, password=password)
+            target = request.form.get("target")
 
             print(f"\t*Logging in with following credential")
             print(f"\t*Username: {username} {password}")
 
-            return 
+            __crawler__ = NetEase_Crawler.Crawler_Facade()
+            __crawler__.start(headless = True, default_login=False)
+            __crawler__.login(account=username, password=password)
+            r_dict_ = __crawler__.craw(target, recursive=True, save_json=True)
+            __crawler__.close()
+
+            __database__ = NetEase_Mongodb.Database_Facade()
+            __database__.start(clear = False)
+            __database__.insert(r_dict_, target) 
+            __database__.close()
+            return render_template("success.html")
 
         elif(request.form.get("option") == "cookie"):
             cookie = request.form.get("cookie")
+            target = request.form.get("target")
             # crawler.login(cookie=)
 
             print(f"\t*Logging in with following credential")
             print(f"\t*Cookie: {cookie}")
 
+            print("Cookie login (with request session) has not yet been implmented")
             raise("Cookie login (with request session) has not yet been implmented")
             return 
 
-        return str(query_dict)
     
     # 不对其他方法作响应
     else:
         abort(404)
  
-
-# 爬取请求处理
-@app.route('/craw/<string:craw_type>', methods=["GET"])
-def craw():
-    # crawler.
-    return
-
 if __name__ == "__main__":
     __crwaler__ = None
     __database__ = None

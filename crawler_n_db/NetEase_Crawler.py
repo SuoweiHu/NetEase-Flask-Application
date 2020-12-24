@@ -122,7 +122,7 @@ class Parser:
 
         return result_dict
 
-    def parse_playlistPage(self, page_source,id=0,recursive=False,recur_limit=5):
+    def parse_playlistPage(self, page_source,id=0,recursive=False,recur_limit=sys.maxsize):
         soup = BeautifulSoup(page_source, 'lxml')
         table_element = soup.find('table', class_="m-table")
         tableBody_element = table_element.find('tbody')
@@ -212,7 +212,7 @@ class Parser:
         # print(result_dict)
         return result_dict
 
-    def parse_userPage(self, page_source,id=0,recursive=False,recur_limit=5):
+    def parse_userPage(self, page_source,id=0,recursive=True,recur_limit=sys.maxsize):
         # page_source.replace("::marker","")
         soup = BeautifulSoup(page_source, 'lxml')
 
@@ -222,13 +222,15 @@ class Parser:
         div_1 = infoWrapper_element.findChildren('div',recursive=False)[0]
         div_2 = infoWrapper_element.findChildren('div',recursive=False)[1]
         div_3 = infoWrapper_element.findChildren('div',recursive=False)[2]
-        div_4 = infoWrapper_element.findChildren('div',recursive=False)[3]
+        # div_4 = infoWrapper_element.findChildren('div',recursive=False)[3]
         # 提取字段
         name = div_1.h2.span.text
         intr = div_2.text
         loct = div_3('span')[0].text
-        age  = div_3('span')[1].span.text
-        med  = div_4.text
+        age = '00后'
+        med = "\n社交网络：\n\n\n\n",
+        # age  = div_3('span')[1].span.text
+        # med  = div_4.text
         # print('name: \t' + name)
         # print('intr: \t' + intr)
         # print('loct: \t' + loct)
@@ -242,6 +244,7 @@ class Parser:
 
         # （处理我的歌单）
         covers_container = my_playlist_container.find_all('div', class_ = "u-cover u-cover-1")
+        
         my_playlists = []
         # 提取每个播放列表的字段
         for cover in covers_container:
@@ -263,28 +266,28 @@ class Parser:
             temp_playlist = {'title':title,'cover':image,'href':href, 'detail':playlist_dict}
             my_playlists.append(temp_playlist)
 
-        # （处理我的歌单）
-        covers_container = added_playlist_container.find_all('div', class_ = "u-cover u-cover-1")
-        added_playlists = []
-        # 提取每个播放列表的字段
-        for cover in covers_container:
-            title = cover.a['title']
-            title = "".join(title.split())
-            href  = cover.a['href']
-            image = cover.img['src']
-            # print('='*10)
-            # print('title: \n\t' + title)
-            # print('href: \n\t' + href)
-            # print('image: \n\t' + image)
-            if(recursive and recur_limit>0):
-                playlist_id   = href[13:]
-                playlist_text = self.crawler.craw_playlistPage(playlist_id)
-                playlist_dict = self.parse_playlistPage(playlist_text)
-                recur_limit-=1
-            else:
-                playlist_dict = "Recursive Disabled"
-            temp_playlist = {'title':title,'cover':image,'href':href, 'detail':playlist_dict}
-            added_playlists.append(temp_playlist)
+        # # （处理我的歌单）
+        # covers_container = added_playlist_container.find_all('div', class_ = "u-cover u-cover-1")
+        # added_playlists = []
+        # # 提取每个播放列表的字段
+        # for cover in covers_container:
+        #     title = cover.a['title']
+        #     title = "".join(title.split())
+        #     href  = cover.a['href']
+        #     image = cover.img['src']
+        #     # print('='*10)
+        #     # print('title: \n\t' + title)
+        #     # print('href: \n\t' + href)
+        #     # print('image: \n\t' + image)
+        #     if(recursive and recur_limit>0):
+        #         playlist_id   = href[13:]
+        #         playlist_text = self.crawler.craw_playlistPage(playlist_id)
+        #         playlist_dict = self.parse_playlistPage(playlist_text)
+        #         recur_limit-=1
+        #     else:
+        #         playlist_dict = "Recursive Disabled"
+        #     temp_playlist = {'title':title,'cover':image,'href':href, 'detail':playlist_dict}
+        #     added_playlists.append(temp_playlist)
 
         # （整合信息）
         result_dict = {
@@ -295,7 +298,8 @@ class Parser:
         'media'         : med,
         'playlists'     : {
             'my' : my_playlists,
-            'added' : added_playlists
+            'added' : []
+            # 'added' : added_playlists
             }
         }
         # print("="*10)
@@ -348,7 +352,36 @@ class Crawler_Facade:
         self.driverFacade = None
         return
 
-    def get_page_of(self,option,id): #, save_file=False, screenshot=False):
+    def scroll(driver, repeat = 5):
+        for i in range(1, repeat):
+            driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+            time.sleep(1)
+
+    def get_page_of(self, option, id, save_file=False):
+        __driver__ = self.driverFacade.driver
+        f_path = Crawler_Utils.FILE_PATH[option]
+        # 发起请求URL
+        base_url = Crawler_Utils.URL_DICT[option]
+        get_query = "?id=" + str(id) 
+        render_url = base_url + get_query
+        # 发起请求
+        __driver__.get(render_url)              # WebDriver平台打开URL
+        time.sleep(2)                           # 强制等待加载，二秒
+        __driver__.implicitly_wait(5)           # 隐样等待加载，最多五秒
+        # scroll(__driver__)                    # 滚动到底部（AJAX动态加载）
+        __driver__.switch_to.frame("g_iframe")          # 切换到搜索结果的内联标签
+        # __driver__.save_screenshot(f_path+"z.png")    # 截图（方便DEBUG查看网页是否加载完）
+        response = __driver__.page_source       # 得到浏览器渲染好的HTML网页
+        # __driver__.close()                    # 关闭当前网页
+        html_f_path = f_path+'temp.html'        # HTML 文件路径
+        # os.remove(html_f_path)                # 删除已有文件
+        if(save_file):
+            with open(html_f_path,'w+') as f:   # 新建文件并写入HTML数据
+                f.write(response)               # (w+ 选项会覆盖已有文件)
+                f.close()                       # 关闭文件
+        return response
+
+    # def get_page_of(self,option,id): #, save_file=False, screenshot=False):
         # 浏览器驱动
         __driver__ = self.driverFacade.driver
 
@@ -361,11 +394,13 @@ class Crawler_Facade:
         # 发起请求
         __driver__.get(render_url)              # WebDriver平台打开URL
         __driver__.implicitly_wait(5)           # 隐样等待加载，最多五秒
+        time.sleep(1)
                 
         # 滚动到底部（AJAX动态加载）
         # ===========================
             # Scroll method - 1 
             # __driver__.executeScript("window.scroll_till_bottomTo(0, document.body.scroll_till_bottomHeight)");
+            # __driver__.implicitly_wait(5)         
 
             # Scroll method - 2                  
             # html = __driver__.find_element_by_tag_name('html')
@@ -377,15 +412,15 @@ class Crawler_Facade:
             # # Get scroll height
             # last_height = driver.execute_script("return document.body.scrollHeight")
             # while True:
-                # # Scroll down to bottom
-                # driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                # # Wait to load page
-                # time.sleep(SCROLL_PAUSE_TIME)
-                # # Calculate new scroll height and compare with last scroll height
-                # new_height = driver.execute_script("return document.body.scrollHeight")
-                # if new_height == last_height:
-                #     break
-                # last_height = new_height
+            #     # Scroll down to bottom
+            #     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            #     # Wait to load page
+            #     time.sleep(SCROLL_PAUSE_TIME)
+            #     # Calculate new scroll height and compare with last scroll height
+            #     new_height = driver.execute_script("return document.body.scrollHeight")
+            #     if new_height == last_height:
+            #         break
+            #     last_height = new_height
         # ===========================
 
         # 获取数据
@@ -405,8 +440,9 @@ class Crawler_Facade:
         # ===========================
         
         return response
+    
     def craw_userPage(self, id):
-        return self.get_page_of('user',id)
+        return self.get_page_of('user',id, True)
     def craw_playlistPage(self, id):
         return self.get_page_of('playlist',id)
     def craw_songPage(self, id):

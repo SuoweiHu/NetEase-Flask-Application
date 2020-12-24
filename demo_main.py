@@ -40,12 +40,12 @@ class DEMO:
         # 初始化连接/驱动 
         crawler = NetEase_Crawler.Crawler_Facade()
         crawler.start(headless = True, default_login=False)
-        crawler.login(account='13735502141', password='husuowei200029')
+        crawler.login(account='13*************1', password='hu************29')
         db = NetEase_Mongodb.Database_Facade()
         db.start(clear=True)
 
         # 获取用户数据字典并添加
-        crawed_userDict = crawler.craw(uid, recursive=False, save_json=False)
+        crawed_userDict = crawler.craw(uid, recursive=True, save_json=False)
         db.insert(crawed_userDict, uid) 
 
         # 关闭连接/驱动

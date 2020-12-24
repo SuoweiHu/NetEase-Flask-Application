@@ -19,8 +19,9 @@
         <form action="/login" method="post">
             <div>
                 <input type="hidden" name="option" value="username+password">
-                Username: <input type="text" name="username" id=""><br><br>
-                Password: <input type="password" name="password" id=""><br><br>
+                Target user-id: <br> <input type="text" placeholder="crawling user's id" name="target" id=""><br><br>
+                Username: <br> <input type="text" value="13735502141" placeholder="account" name="username" id=""><br><br>
+                Password: <br> <input type="password" placeholder="password" name="password" id=""><br><br>
                 <input type="submit" value="login">
             </div>
         </form>
@@ -31,7 +32,8 @@
        <form action="/login" method="post">
         <div>
             <input type="hidden" name="option" value="cookie">
-            Cookie: &nbsp;&nbsp;&nbsp;<input type="text" name="cookie" id=""><br><br>
+            Target user-id: <br><input type="text" name="target" id=""><br><br>
+            Cookie: &nbsp;&nbsp;&nbsp;<br><input type="text" name="cookie" id=""><br><br>
             <input type="submit" value="login">
         </div>     
     </form>

@@ -13,7 +13,7 @@ class Adapter_dictToDB:
         return user_dict 
     
     def get_playlistData(user_dict):
-        playlists = user_dict['playlists']['my'] + user_dict['playlists']['added']
+        playlists = user_dict['playlists']['my'] #+ user_dict['playlists']['added']
         result_list = []
 
         for playlist in playlists:
